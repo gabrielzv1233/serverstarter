@@ -38,24 +38,24 @@ def main():
             data = json.load(f)
 
             if args.mem != default_mem:
-                print(f"[CLI override] Using --mem {mem} instead of config")
+                print(f"Using --mem {mem} instead of config")
             else:
                 mem = validate_mem(data.get('mem', mem))
 
             if args.jar != default_jar:
-                print(f"[CLI override] Using --jar {args.jar} instead of config")
+                print(f"Using --jar {args.jar} instead of config")
                 jarfile = args.jar
             else:
                 jarfile = data.get('jarfile', jarfile)
 
             if args.java != default_java:
-                print(f"[CLI override] Using --java {args.java} instead of config")
+                print(f"Using --java {args.java} instead of config")
                 java_path = args.java
             else:
                 java_path = data.get('javapath', java_path)
 
             if args.gui:
-                print(f"[CLI override] --gui is enabled")
+                print(f"Using --gui instead of config")
             use_gui = use_gui or data.get('gui', False)
 
     elif os.path.isfile(os.path.join(path, 'start.bat')):
