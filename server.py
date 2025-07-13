@@ -2,6 +2,8 @@ import os
 import json
 import argparse
 import subprocess
+import re
+import sys
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--path", type=str, default=os.getcwd())
@@ -9,8 +11,14 @@ parser.add_argument("--json", type=str, default='launchopts.json')
 parser.add_argument("--java", type=str, default="C:/Program Files/Eclipse Adoptium/jre-21.0.4.7-hotspot/bin/java.exe")
 parser.add_argument("--mem", type=str, default="16G")
 parser.add_argument("--jar", type=str, default="paper.jar")
-parser.add_argument("--gui", action="store_true")  # <-- New GUI flag
+parser.add_argument("--gui", action="store_true")
 args = parser.parse_args()
+
+def validate_mem(mem):
+    if re.fullmatch(r'\d+[MG]', mem.upper()):
+        return mem.upper()
+    print(f"Invalid --mem value: '{mem}'. Use format like '16G' or '1024M'")
+    sys.exit(1)
 
 def main():
     path = args.path
@@ -20,7 +28,7 @@ def main():
     default_mem = "16G"
     default_jar = "paper.jar"
 
-    mem = default_mem
+    mem = validate_mem(args.mem)
     jarfile = default_jar
     java_path = default_java
     use_gui = args.gui
@@ -28,21 +36,26 @@ def main():
     if os.path.isfile(json_path):
         with open(json_path, 'r') as f:
             data = json.load(f)
+
             if args.mem != default_mem:
-                mem = args.mem
+                print(f"[CLI override] Using --mem {mem} instead of config")
             else:
-                mem = data.get('mem', mem)
+                mem = validate_mem(data.get('mem', mem))
 
             if args.jar != default_jar:
+                print(f"[CLI override] Using --jar {args.jar} instead of config")
                 jarfile = args.jar
             else:
                 jarfile = data.get('jarfile', jarfile)
 
             if args.java != default_java:
+                print(f"[CLI override] Using --java {args.java} instead of config")
                 java_path = args.java
             else:
                 java_path = data.get('javapath', java_path)
 
+            if args.gui:
+                print(f"[CLI override] --gui is enabled")
             use_gui = use_gui or data.get('gui', False)
 
     elif os.path.isfile(os.path.join(path, 'start.bat')):
