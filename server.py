@@ -9,6 +9,7 @@ parser.add_argument("--json", type=str, default='launchopts.json')
 parser.add_argument("--java", type=str, default="C:/Program Files/Eclipse Adoptium/jre-21.0.4.7-hotspot/bin/java.exe")
 parser.add_argument("--mem", type=str, default="16G")
 parser.add_argument("--jar", type=str, default="paper.jar")
+parser.add_argument("--gui", action="store_true")  # <-- New GUI flag
 args = parser.parse_args()
 
 def main():
@@ -22,6 +23,7 @@ def main():
     mem = default_mem
     jarfile = default_jar
     java_path = default_java
+    use_gui = args.gui
 
     if os.path.isfile(json_path):
         with open(json_path, 'r') as f:
@@ -40,6 +42,9 @@ def main():
                 java_path = args.java
             else:
                 java_path = data.get('javapath', java_path)
+
+            use_gui = use_gui or data.get('gui', False)
+
     elif os.path.isfile(os.path.join(path, 'start.bat')):
         return 200, 0, os.path.join(path, "start.bat")
     else:
@@ -60,7 +65,8 @@ def main():
         if not found:
             return 404, 2, None
 
-    command = f'"{java_path}" -Xmx{mem} -jar "{jarfile}" nogui'
+    nogui_flag = "" if use_gui else " nogui"
+    command = f'"{java_path}" -Xmx{mem} -jar "{jarfile}"{nogui_flag}'
     print(f"Running: {command}")
     return 200, -1, command
 
